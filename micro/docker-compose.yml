@@ -2,7 +2,7 @@ version: '3'
 services:
   mongo:
     container_name: mongo
-    image: mongo:latest
+    image: mongo:4.0
     environment:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
@@ -27,7 +27,7 @@ services:
     restart: always
     build: 
       context: ../gateway
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
     networks:
       - mynetwork
     volumes:
@@ -42,7 +42,7 @@ services:
     restart: always
     build: 
       context: ../student
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
     networks:
       - mynetwork
     volumes:
@@ -57,7 +57,7 @@ services:
     restart: always
     build: 
       context: ../order
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
     networks:
       - mynetwork
     volumes:
@@ -71,7 +71,7 @@ services:
   nginx:
     build: 
       context: .
-      dockerfile: Dockerfile
+      dockerfile: DockerFile
     ports:
       - 80:80
     depends_on:

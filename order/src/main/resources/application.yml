@@ -7,3 +7,5 @@ management:
       
 logging:
    file: /logs/order-json.log      
+
+testkey: 1234567890
