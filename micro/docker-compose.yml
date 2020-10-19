@@ -80,5 +80,73 @@ services:
       - mynetwork
     command: [nginx-debug, '-g', 'daemon off;']
     
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
+    container_name: service-elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-docker-cluster
+#      - discovery.seed_hosts=es02,es03
+      # - cluster.initial_master_nodes=elasticsearch
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+#    mem_limit: 500m
+#    cap_add:
+#      - IPC_LOCK
+#    volumes:
+#      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - mynetwork
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.8.0
+    container_name: service-kibana
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - mynetwork
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.8.0
+    container_name: service-logstash
+    command: logstash -f /usr/share/logstash/pipeline
+    volumes:
+      - ../containerized-logstash/config:/usr/share/logstash/config:ro
+      - ../containerized-logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5000:5000"
+      - "12204:12204"
+    depends_on:
+      - elasticsearch
+    networks:
+      - mynetwork
+    
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.8.0
+    container_name: service-filebeat
+    volumes:
+      - ../containerized-filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
+    ports:
+      - "12201:12201"
+    depends_on:
+      - elasticsearch
+    networks:
+      - mynetwork
+    
 networks:
   mynetwork:
